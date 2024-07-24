@@ -105,8 +105,57 @@ exports.userSignIn = async (req, res) => {
         res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
+exports.createUser = async (req, res) => {
+    try {
+      const { fullname, email, password } = req.body; // Récupérez les informations de l'utilisateur depuis la requête
+  
+      // Générez un sel et hash le mot de passe
+    
+      const hashedPassword = await bcrypt.hash(password,10);
+  
+      // Création d'un nouvel utilisateur avec le mot de passe hashé
+      const newUser = new Patient({
+        fullname,
+        email,
+        password: hashedPassword, // Utilisez le mot de passe hashé ici
+        roles:["patient"],
+        verified:true,
+      });
+  
+      // Sauvegardez l'utilisateur dans la base de données
+      await newUser.save();
+      res.status(201).send({ message: 'User created successfully', user: { id: newUser._id, email: newUser.email } });
+    } catch (error) {
+      res.status(500).send({ message: 'Failed to create user', error: error.message });
+    }
+  };
 
-
+exports.modifUser = async (req, res) => {
+    const { id, updateData } = req.body; // Assurez-vous que l'ID et les données de mise à jour sont envoyés dans le corps de la requête
+    try {
+      const updatedUser = await Patient.findByIdAndUpdate(id, updateData, { new: true });
+      if (!updatedUser) {
+        return res.status(404).send({ message: 'User not found' });
+      }
+      res.send({ message: 'User updated successfully', updatedUser });
+    } catch (error) {
+      res.status(500).send({ message: 'Failed to update user', error: error.message });
+    }
+  };
+  
+  exports.deleteUser = async (req, res) => {
+    const { id } = req.params; 
+    try {
+      const deletedUser = await User.findByIdAndDelete(id);
+      if (!deletedUser) {
+        return res.status(404).send({ message: 'User not found' });
+      }
+      res.send({ message: 'User deleted successfully' });
+    } catch (error) {
+      res.status(500).send({ message: 'Failed to delete user', error: error.message });
+    }
+  };
+  
 // Controller to handle creation of a doctor
 exports.createDoctor = async (req, res) => {
     const { fullname, email, password, specialty } = req.body;
@@ -169,6 +218,16 @@ exports.getDoctorCount = async (req, res) => {
         const doctorCount = await Doctor.countDocuments();
         res.status(200).json({ doctorCount });
     } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+exports.getAllPatients = async (req, res) => {
+    try {
+       const allPatients = await Patient.find(); // Assuming `Patient.getAll()` fetches all patients
+       res.status(200).json(allPatients); // You could just return the array directly unless you need to wrap it in an object
+    } catch (error) {
+        console.error("Failed to retrieve patients:", error); // Good practice to log the error
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };

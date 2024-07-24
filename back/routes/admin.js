@@ -6,6 +6,11 @@ const checkRole = require('../middelwares/role');
 
 
 router.post('/signin',  adminController.userSignIn);
+router.post("/refresh" ,isAuth, adminController.refresh)
+router.get ("/get-users", isAuth , checkRole('admin'), adminController.getAllPatients);
+router.post("/createUser" , isAuth , checkRole('admin') , adminController.createUser);
+router.put('/modifUser', isAuth, checkRole('admin'), adminController.modifUser);
+router.delete('/deleteUser/:id', isAuth, checkRole('admin'), adminController.deleteUser);
 // Route to create a doctor account
 router.post('/create-doctor', isAuth, checkRole('admin'), adminController.createDoctor);
 

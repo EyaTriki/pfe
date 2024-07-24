@@ -1,9 +1,38 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert } from 'react-native';
 import axios from 'axios';
-import Icon from 'react-native-vector-icons/MaterialIcons';  // Ensure this is correctly imported
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { BASE_URL } from '../config';
 import { AuthContext } from '../context/AuthContext';
+
+// Descriptions statiques basées sur les labels
+const descriptions = {
+  Acne: {
+    description: 'Acne is a skin condition that occurs when your hair follicles become plugged with oil and dead skin cells, leading to whiteheads, blackheads, or pimples.',
+    advice: 'Keep your face clean, avoid popping pimples, and use non-comedogenic makeup.',
+    moreInfoUrl: 'https://www.google.nl/',
+  },
+  Eczema: {
+    description: "Eczema, or atopic dermatitis, is a condition that makes your skin red and itchy. It's common in children but can occur at any age.",
+    advice: 'Moisturize regularly, avoid harsh soaps and detergents, and consider using a humidifier in dry weather.',
+    moreInfoUrl: 'https://www.google.nl/',
+  },
+  Rosacea: {
+    description: 'Rosacea is a common skin condition that causes redness and visible blood vessels in your face. It may also produce small, red, pus-filled bumps.',
+    advice: 'Avoid triggers like hot drinks, spicy foods, and alcohol. Use gentle skin care products and consider medical therapies if symptoms persist.',
+    moreInfoUrl: 'https://www.google.nl/',
+  },
+  'Actinic Keratosis': {
+    description: 'Actinic Keratosis is a rough, scaly patch on your skin that develops from years of exposure to the sun, and can sometimes progress to skin cancer.',
+    advice: 'Seek shade, wear sun-protective clothing, and apply sunscreen regularly.',
+    moreInfoUrl: 'https://www.google.nl/',
+  },
+  'Basal Cell Carcinoma': {
+    description: 'Basal Cell Carcinoma is a type of skin cancer that begins in the basal cells. It often manifests as a slightly transparent bump on the sun-exposed skin.',
+    advice: 'Consult a dermatologist for potential treatment options such as surgical removal or topical treatments.',
+    moreInfoUrl: 'https://www.google.nl/',
+  },
+};
 
 const HistoryScreen = ({ navigation }) => {
   const [captures, setCaptures] = useState([]);
@@ -45,14 +74,18 @@ const HistoryScreen = ({ navigation }) => {
 
   const renderItem = ({ item }) => {
     const imageUrl = `${BASE_URL}/${item.path.replace(/\\/g, '/')}`;
+    const itemDescription = descriptions[item.label]?.description || "Description not available.";
 
     return (
       <View style={styles.itemContainer}>
         <Image source={{ uri: imageUrl }} style={styles.image} />
         <View style={styles.infoContainer}>
-          <Text style={styles.label}>{item.label}</Text>
+          <View>
+            <Text style={styles.label}>{item.label}</Text>
+            <Text style={styles.description} numberOfLines={2}>{itemDescription}</Text>
+          </View>
           <TouchableOpacity onPress={() => handleDelete(item._id)} style={styles.deleteIcon}>
-            <Icon name="delete" size={24} color="red" />
+            <Icon name="cancel" size={24} color="black" />
           </TouchableOpacity>
         </View>
       </View>
@@ -94,15 +127,25 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    position: 'relative',  // Important pour positionner absolument l'icône
   },
   label: {
     fontSize: 18,
-    color: '#333'
+    color: '#333',
+    fontWeight: 'bold'
+  },
+  description: {
+    fontSize: 16,
+    color: '#666'
   },
   deleteIcon: {
-    marginLeft: 10
+    position: 'absolute', // Utilisation de position absolue
+    right: 0,            // Aligner à droite
+    top: '10%',          // Centrer verticalement
+    marginTop: -12,      // Ajustement pour centrer l'icône
   }
 });
+
 
 export default HistoryScreen;
